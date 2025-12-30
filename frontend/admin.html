@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>급식알리미</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      button {
+        width: 100px;
+        height: 100px;
+        margin: 10px;
+      }
+      h2 {
+        color: gray;
+      }
+      input {
+        width: 90vw;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="sound"></h1>
+    <button onclick="readData()">데이터 읽기</button>
+    <h1>반 개수</h1>
+    <h2>[1학년 반 개수, 2학년 반 개수, 3학년 반 개수] ex) [10,10,10]</h2>
+    <input type="text" id="a" />
+    <h1>첫번째 반</h1>
+    <h2>[1학년 첫 반, 2학년 첫 반, 3학년 첫 반] ex) [1,1,1]</h2>
+    <input type="text" id="f" />
+    <button onclick="writeData()">데이터 쓰기</button>
+
+    <button onclick="next1()">1학년 다음</button>
+    <button onclick="next2()">2학년 다음</button>
+    <button onclick="next3()">3학년 다음</button>
+
+    <button onclick="sound()">알림</button>
+
+    <script src="/socket.io/socket.io.js" style="display: none"></script>
+    <script>
+      window.addEventListener("load", (e) => {
+        fetch(`/getClass`)
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      });
+
+      function sound() {
+        fetch("/playSound")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+          });
+      }
+      function next1() {
+        fetch(`/nextClass/0`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      }
+      function next2() {
+        fetch(`/nextClass/1`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      }
+      function next3() {
+        fetch(`/nextClass/2`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      }
+      function readData() {
+        fetch(`/read`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            document.getElementById("a").value = "[" + data.classAmount + "]";
+            document.getElementById("f").value = "[" + data.firstClass + "]";
+          });
+      }
+      function writeData() {
+        var _data;
+        fetch(`/read`)
+          .then((response) => response.json())
+          .then((data) => {
+            _data = data;
+          });
+
+        const amount =
+          document.getElementById("a").value != null
+            ? document.getElementById("a").value
+            : _data.classAmount;
+        const first =
+          document.getElementById("f").value != null
+            ? document.getElementById("f").value
+            : _data.firstClass;
+
+        const result = `{ "classAmount": ${amount}, "firstClass": ${first} }`;
+
+        fetch(`/write/${result}`);
+      }
+
+      const socket = io();
+      socket.on("nowClass", (newIndex) => {
+        fetch(`/getClass`)
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      });
+    </script>
+  </body>
+</html>

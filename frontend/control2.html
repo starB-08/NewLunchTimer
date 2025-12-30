@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>급식알리미</title>
+    <style>
+      html {
+        font-size: 1vw;
+      }
+      body {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #buttons {
+        width: 100vw;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        height: 100vh;
+      }
+      button {
+        width: 25%;
+        aspect-ratio: 1;
+        font-size: 4rem;
+        margin: 10px;
+        border-radius: 12%;
+      }
+      #sound {
+        margin-top: 5vh;
+        font-size: 7rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="sound">현재 반: 1반, 1반, 1반</h1>
+    <div id="buttons">
+      <button onclick="prev2()">2학년 이전</button>
+      <button onclick="next2()">2학년 다음</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js" style="display: none"></script>
+    <script>
+      window.addEventListener("load", (e) => {
+        fetch(`/getClass`)
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      });
+
+      function next2() {
+        fetch(`/nextClass/1`)
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      }
+
+      function prev2() {
+        fetch(`/prevClass/1`)
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      }
+      const socket = io();
+      socket.on("nowClass", (newIndex) => {
+        fetch(`/getClass`)
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(data);
+            document.getElementById(
+              "sound"
+            ).innerText = `1학년: ${data[0]}반 \n2학년: ${data[1]}반 \n3학년: ${data[2]}반`;
+          });
+      });
+    </script>
+  </body>
+</html>
