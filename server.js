@@ -154,11 +154,6 @@ app.get("/getIndex", (req, res) => {
 
 server.listen(port, () => {
   console.log(`server is listening at localhost:${port}`);
-  fetch(`http://127.0.0.1:3000/read`)
-    .then((response) => response.json())
-    .then((data) => {
-      //   console.log(data);
-    });
 });
 
 //----------------------------------------------------------//
