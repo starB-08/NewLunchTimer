@@ -1,10 +1,20 @@
+import { createClient } from "redis";
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const { Server } = require("socket.io");
 const http = require("http");
-
+const db = createClient({
+  username: "default",
+  password: process.env.DB_PW,
+  socket: {
+    host: process.env.DB_URL,
+    port: 15900,
+  },
+});
+db.on("error", (err) => console.log("Redis Client Error", err));
+await db.connect();
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
@@ -84,9 +94,9 @@ app.get("/getClass", (req, res) => {
 });
 
 app.get("/read", async (req, res) => {
-  const response = await fetch(`${DB_URL}/read`);
-  const data = await response.json();
+  const result = await db.get("settings");
 
+  const data = result ? JSON.parse(result) : null;
   _data = data;
   firstClass = _data.firstClass;
   maxClass = _data.classAmount;
@@ -115,10 +125,17 @@ app.get("/write/:v", (req, res) => {
 
   console.log(`asdf: ${classIndex}`);
   io.emit("nowClass", nowClass);
-  fetch(`${DB_URL}/write/${value}`)
-    .then((response) => response.json())
-    .then((data) => {});
+  write_db(_data);
 });
+
+async function write_db(
+  _data = `{
+    classAmount: [10, 10, 10],
+    firstClass: [1, 1, 1],
+  };`
+) {
+  await db.set("settings", JSON.stringify(_data));
+}
 
 app.get("/getMaxClass", (req, res) => {
   res.json(JSON.parse(`{"max":[${maxClass}], "first":[${firstClass}]}`));
