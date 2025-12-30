@@ -1,4 +1,4 @@
-import { createClient } from "redis";
+const { createClient } = require("redis");
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -14,7 +14,9 @@ const db = createClient({
   },
 });
 db.on("error", (err) => console.log("Redis Client Error", err));
-await db.connect();
+async () => {
+  await db.connect();
+};
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
