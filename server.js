@@ -14,9 +14,11 @@ const db = createClient({
   },
 });
 db.on("error", (err) => console.log("Redis Client Error", err));
-async () => {
+(async () => {
   await db.connect();
-};
+  console.log("Redis connected");
+})();
+
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
