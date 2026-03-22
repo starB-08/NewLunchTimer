@@ -97,8 +97,13 @@ app.get("/getClass", (req, res) => {
     console.log(nowClass);
 });
 
-app.get("/read", async (req, res) => {
+async function readSettings() {
     const result = await db.get("settings");
+
+    if (!result) {
+        console.log("No settings found in Redis, using default");
+        return null;
+    }
 
     const data = result ? JSON.parse(result) : null;
     _data = data;
@@ -106,7 +111,12 @@ app.get("/read", async (req, res) => {
     maxClass = _data.classAmount;
 
     // console.log(`1: ${JSON.stringify(_data)} / ${firstClass} / ${maxClass}`);
-    res.json(_data);
+    return _data;
+}
+
+app.get("/read", async (req, res) => {
+    const data = await readSettings();
+    res.json(data);
 });
 
 app.get("/write/:v", (req, res) => {
@@ -130,6 +140,7 @@ app.get("/write/:v", (req, res) => {
     console.log(`asdf: ${classIndex}`);
     io.emit("nowClass", nowClass);
     write_db(_data);
+    res.json({ status: "ok" });
 });
 
 async function write_db(
@@ -154,8 +165,26 @@ app.get("/getIndex", (req, res) => {
     res.send(classIndex);
 });
 
-server.listen(port, () => {
+server.listen(port, async () => {
     console.log(`server is listening at localhost:${port}`);
+
+    const init_data = await readSettings();
+
+    if (!init_data) {
+        console.log("Initializing default settings");
+
+        _data = {
+            classAmount: [10, 10, 13],
+            firstClass: [1, 1, 1],
+        };
+
+        firstClass = _data.firstClass;
+        maxClass = _data.classAmount;
+
+        await write_db(_data);
+    }
+
+    console.log("Initial settings:", _data);
 });
 
 //----------------------------------------------------------//
