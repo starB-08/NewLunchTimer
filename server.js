@@ -168,23 +168,12 @@ app.get("/getIndex", (req, res) => {
 server.listen(port, async () => {
     console.log(`server is listening at localhost:${port}`);
 
-    const init_data = await readSettings();
-
-    if (!init_data) {
-        console.log("Initializing default settings");
-
-        _data = {
-            classAmount: [10, 10, 13],
-            firstClass: [1, 1, 1],
-        };
-
-        firstClass = _data.firstClass;
-        maxClass = _data.classAmount;
-
-        await write_db(_data);
+    try {
+        await db.get("settings"); // 🔥 그냥 가볍게 호출
+        console.log("DB wake-up call done");
+    } catch (e) {
+        console.log(e);
     }
-
-    console.log("Initial settings:", _data);
 });
 
 //----------------------------------------------------------//
